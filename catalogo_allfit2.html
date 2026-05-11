@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALLFIT — Catalogo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --brand:#018fc7;--brand-dark:#016fa0;
+  --brand-light:#e6f5fc;
+  --bg:#f2f7fa;--surface:#fff;--surface2:#eaf4fa;--surface3:#f7fbfd;
+  --border:rgba(1,143,199,0.13);--border2:rgba(1,143,199,0.28);
+  --text:#0c1d2b;--muted:#577585;--muted2:#9ab4bf;
+  --danger:#e03030;--danger-light:#fdeaea;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+button{font-family:'DM Sans',sans-serif;cursor:pointer;}
+input,select,textarea{font-family:'DM Sans',sans-serif;}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 1.5rem;box-shadow:0 1px 16px rgba(1,143,199,.07);}
+.topbar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:1rem;height:58px;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:4px;color:var(--brand);}
+.logo small{font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;line-height:1;margin-top:-3px;}
+.tab-bar{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px;margin-left:auto;}
+.tab{padding:6px 18px;border-radius:6px;border:none;background:transparent;font-size:13px;color:var(--muted);font-weight:500;transition:all .15s;}
+.tab.active{background:var(--brand);color:#fff;box-shadow:0 2px 8px rgba(1,143,199,.25);}
+.tab:hover:not(.active){background:rgba(1,143,199,.08);color:var(--brand);}
+.tab-adm{display:none;}
+.lock-btn{width:34px;height:34px;border-radius:7px;border:1px solid var(--border2);background:transparent;color:var(--muted2);display:flex;align-items:center;justify-content:center;font-size:15px;margin-left:4px;transition:all .15s;flex-shrink:0;}
+.lock-btn:hover{background:var(--surface2);color:var(--muted);}
+
+/* LOGIN MODAL */
+.login-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,20,40,.55);backdrop-filter:blur(6px);align-items:center;justify-content:center;}
+.login-overlay.open{display:flex;}
+.login-box{background:var(--surface);border:1px solid var(--border2);border-radius:18px;padding:2.2rem 2rem;max-width:320px;width:90%;box-shadow:0 24px 64px rgba(1,143,199,.18);text-align:center;}
+.login-logo{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:4px;color:var(--brand);margin-bottom:4px;}
+.login-sub{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:1.8rem;}
+.login-field{position:relative;margin-bottom:.8rem;}
+.login-field input{width:100%;padding:11px 42px 11px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;font-size:14px;color:var(--text);outline:none;transition:border-color .15s;letter-spacing:2px;}
+.login-field input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(1,143,199,.1);}
+.login-field input.err{border-color:var(--danger);}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted2);font-size:15px;cursor:pointer;padding:0;}
+.login-err{font-size:12px;color:var(--danger);margin-bottom:.8rem;min-height:16px;}
+.btn-login{width:100%;padding:11px;border-radius:10px;border:none;background:var(--brand);color:#fff;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;transition:background .15s;margin-top:4px;}
+.btn-login:hover{background:var(--brand-dark);}
+
+/* PAGES */
+.page{max-width:1200px;margin:0 auto;padding:1.5rem;display:none;}
+.page.active{display:block;}
+
+/* CATALOG */
+.cat-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:1.25rem;}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:0 12px;height:38px;flex:1;max-width:280px;}
+.search-box input{border:none;background:transparent;outline:none;font-size:13px;color:var(--text);width:100%;}
+.search-box input::placeholder{color:var(--muted2);}
+.chip{padding:6px 14px;border-radius:99px;border:1px solid var(--border2);background:var(--surface);color:var(--muted);font-size:12px;font-weight:500;transition:all .15s;}
+.chip:hover:not(.active){border-color:var(--brand);color:var(--brand);background:var(--brand-light);}
+.chip.active{background:var(--brand);border-color:var(--brand);color:#fff;}
+.view-btns{display:flex;gap:3px;}
+.vbtn{width:34px;height:34px;border-radius:7px;border:1px solid var(--border2);background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.vbtn.active{background:var(--brand);border-color:var(--brand);color:#fff;}
+.count{font-size:12px;color:var(--muted);white-space:nowrap;}
+
+/* LIST */
+.list-view{display:flex;flex-direction:column;gap:3px;}
+.list-row{display:grid;grid-template-columns:56px 1fr 190px 110px 120px 120px;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 16px;transition:border-color .15s,box-shadow .15s;}
+.list-row:hover{border-color:var(--brand);box-shadow:0 2px 14px rgba(1,143,199,.09);}
+.l-thumb{width:48px;height:48px;border-radius:8px;object-fit:cover;background:var(--brand-light);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden;}
+.l-thumb img{width:100%;height:100%;object-fit:cover;}
+.l-name{font-size:14px;font-weight:500;}
+.l-brand{font-size:11px;color:var(--muted);margin-top:2px;}
+.l-desc{font-size:12px;color:var(--muted);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.l-price{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--brand);}
+.badge{font-size:11px;padding:3px 9px;border-radius:99px;white-space:nowrap;font-weight:500;}
+.btn-det{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:6px 14px;border-radius:6px;border:1px solid var(--border2);color:var(--brand);background:var(--brand-light);transition:all .15s;font-weight:500;}
+.btn-det:hover{background:var(--brand);color:#fff;border-color:var(--brand);}
+
+/* GRID */
+.grid-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.g-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .15s;}
+.g-card:hover{border-color:var(--brand);box-shadow:0 4px 20px rgba(1,143,199,.12);transform:translateY(-2px);}
+.g-img{width:100%;height:160px;background:var(--brand-light);display:flex;align-items:center;justify-content:center;font-size:52px;overflow:hidden;flex-shrink:0;}
+.g-img img{width:100%;height:100%;object-fit:cover;}
+.g-body{padding:.9rem;display:flex;flex-direction:column;gap:5px;flex:1;}
+.g-cat{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
+.g-name{font-size:14px;font-weight:500;line-height:1.3;}
+.g-brand{font-size:11px;color:var(--muted);}
+.g-desc{font-size:12px;color:var(--muted);line-height:1.5;flex:1;}
+.g-price{font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--brand);letter-spacing:1px;margin-top:4px;}
+
+/* BADGES */
+.b-proteinas{background:#ddf1fa;color:#0177a8;}
+.b-creatinas{background:#dde8fa;color:#1a5fa0;}
+.b-preentreno{background:#ddf6e8;color:#1a7a4a;}
+.b-vitaminas{background:#eeebff;color:#5040b0;}
+.b-quemadores{background:#fdeee0;color:#c05010;}
+.b-recuperacion{background:#d8f6ee;color:#0a6e56;}
+.b-volumen{background:#fdf3d8;color:#8a5c00;}
+.b-accesorios{background:#edf2f5;color:#4a6070;}
+
+/* MODAL DETALLE */
+.overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,20,40,.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1rem;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:18px;max-width:480px;width:100%;position:relative;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(1,143,199,.15);}
+.modal-x{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.9);border:1px solid var(--border);color:var(--muted);border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;}
+.modal-x:hover{background:var(--brand);color:#fff;border-color:var(--brand);}
+.m-img{width:100%;height:220px;background:var(--brand-light);display:flex;align-items:center;justify-content:center;font-size:72px;overflow:hidden;border-radius:18px 18px 0 0;}
+.m-img img{width:100%;height:100%;object-fit:cover;}
+.m-body{padding:1.5rem;}
+.m-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.8rem;gap:12px;}
+.m-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;line-height:1.1;}
+.m-price{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--brand);letter-spacing:1px;white-space:nowrap;}
+.m-sub{font-size:12px;color:var(--muted);margin-bottom:1rem;}
+.m-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:1.1rem;padding-bottom:1.1rem;border-bottom:1px solid var(--border);}
+.sec-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted2);margin-bottom:7px;}
+.n-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:1.1rem;}
+.n-cell{background:var(--surface2);border-radius:8px;padding:9px 11px;border:1px solid var(--border);}
+.n-val{font-size:15px;font-weight:600;color:var(--brand);}
+.n-lbl{font-size:11px;color:var(--muted);margin-top:1px;}
+.flavor-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:.4rem;}
+.fpill{font-size:11px;padding:3px 11px;border-radius:99px;border:1px solid var(--border2);color:var(--muted);background:var(--surface2);}
+
+/* ADMIN */
+.adm-layout{display:grid;grid-template-columns:1fr 440px;gap:1.5rem;align-items:start;}
+.adm-list-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.adm-thead{display:grid;grid-template-columns:44px 1fr 90px 90px 80px;gap:12px;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
+.adm-row{display:grid;grid-template-columns:44px 1fr 90px 90px 80px;gap:12px;padding:9px 14px;border-bottom:1px solid var(--border);align-items:center;transition:background .12s;}
+.adm-row:last-child{border-bottom:none;}
+.adm-row:hover{background:var(--surface3);}
+.adm-thumb{width:38px;height:38px;border-radius:7px;object-fit:cover;background:var(--brand-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;}
+.adm-thumb img{width:100%;height:100%;object-fit:cover;}
+.adm-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.adm-brand-sm{font-size:11px;color:var(--muted);}
+.adm-price-sm{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--brand);}
+.adm-actions{display:flex;gap:5px;justify-content:flex-end;}
+.btn-edit{width:28px;height:28px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s;}
+.btn-edit:hover{background:var(--brand-light);color:var(--brand);border-color:var(--brand);}
+.btn-del{width:28px;height:28px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--muted2);display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s;}
+.btn-del:hover{background:var(--danger-light);color:var(--danger);}
+
+/* FORM */
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;position:sticky;top:74px;}
+.form-title{font-size:15px;font-weight:600;margin-bottom:1.2rem;display:flex;align-items:center;gap:8px;}
+.form-badge{font-size:11px;padding:3px 9px;border-radius:99px;background:var(--brand-light);color:var(--brand);font-weight:500;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-full{grid-column:1/-1;}
+.field label{display:block;font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;}
+.field input,.field select,.field textarea{width:100%;padding:8px 11px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;font-size:13px;color:var(--text);outline:none;transition:border-color .15s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(1,143,199,.1);}
+.field textarea{resize:vertical;min-height:72px;}
+
+/* IMG UPLOAD */
+.img-upload-wrap{position:relative;}
+.img-preview{width:100%;height:130px;border-radius:10px;border:1.5px dashed var(--border2);background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:border-color .15s,background .15s;overflow:hidden;}
+.img-preview:hover{border-color:var(--brand);background:var(--brand-light);}
+.img-preview img{width:100%;height:100%;object-fit:cover;border-radius:9px;}
+.img-preview .placeholder{font-size:28px;}
+.img-preview .ph-text{font-size:12px;color:var(--muted);}
+.img-clear{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:99px;background:rgba(0,0,0,.45);border:none;color:#fff;font-size:12px;display:none;align-items:center;justify-content:center;cursor:pointer;}
+.img-clear.show{display:flex;}
+.img-file-input{display:none;}
+
+.form-actions{display:flex;gap:8px;margin-top:1.1rem;}
+.btn-save{flex:1;padding:9px;border-radius:8px;border:none;background:var(--brand);color:#fff;font-size:13px;font-weight:600;transition:background .15s;}
+.btn-save:hover{background:var(--brand-dark);}
+.btn-cancel{padding:9px 16px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;}
+.btn-cancel:hover{background:var(--surface2);}
+.btn-new{display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;border:1px dashed var(--border2);background:transparent;color:var(--brand);font-size:13px;font-weight:500;width:100%;justify-content:center;margin-bottom:1rem;transition:all .15s;}
+.btn-new:hover{background:var(--brand-light);border-color:var(--brand);}
+.empty{text-align:center;padding:3rem;color:var(--muted);font-size:14px;}
+.empty span{font-size:32px;display:block;margin-bottom:10px;}
+.toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--brand);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(1,143,199,.3);transform:translateY(60px);opacity:0;transition:all .3s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.err{background:var(--danger);}
+
+@media(max-width:900px){
+  .adm-layout{grid-template-columns:1fr;}
+  .form-card{position:static;}
+  .list-row{grid-template-columns:48px 1fr auto auto;}
+  .l-desc{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="logo">ALLFIT<small>Suplementos</small></div>
+    <div class="tab-bar">
+      <button class="tab active" id="tabCat" onclick="showPage('catalogo')">Catalogo</button>
+      <button class="tab tab-adm" id="tabAdm" onclick="showPage('admin')">Administrar</button>
+    </div>
+    <button class="lock-btn" id="lockBtn" onclick="handleLock()" title="Admin">&#x1F512;</button>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">ALLFIT</div>
+    <div class="login-sub">Acceso administrador</div>
+    <div class="login-field">
+      <input type="password" id="pwInput" placeholder="Contrasena" onkeydown="if(event.key==='Enter')tryLogin()">
+      <button class="eye-btn" id="eyeBtn" onclick="toggleEye()">&#128065;</button>
+    </div>
+    <div class="login-err" id="loginErr"></div>
+    <button class="btn-login" onclick="tryLogin()">Ingresar</button>
+  </div>
+</div>
+
+<!-- CATALOGO -->
+<div class="page active" id="page-catalogo">
+  <div class="cat-controls">
+    <div class="search-box">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--muted2);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="catSearch" placeholder="Buscar..." oninput="renderCatalog()">
+    </div>
+    <div id="catFilters" style="display:flex;gap:7px;flex-wrap:wrap;"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
+      <span class="count" id="catCount"></span>
+      <div class="view-btns">
+        <button class="vbtn active" id="vList" onclick="setView('list')" title="Lista">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </button>
+        <button class="vbtn" id="vGrid" onclick="setView('grid')" title="Grilla">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="catContainer"></div>
+</div>
+
+<!-- ADMIN -->
+<div class="page" id="page-admin">
+  <div class="adm-layout">
+    <div>
+      <button class="btn-new" onclick="newProduct()">+ Agregar nuevo producto</button>
+      <div class="adm-list-wrap">
+        <div class="adm-thead">
+          <div></div><div>Producto</div><div>Categoria</div><div>Precio</div><div>Acciones</div>
+        </div>
+        <div id="admList"></div>
+      </div>
+    </div>
+    <div class="form-card" id="formCard" style="display:none;">
+      <div class="form-title"><span class="form-badge" id="formMode">Nuevo</span> producto</div>
+      <div class="form-grid">
+        <!-- IMAGEN -->
+        <div class="field form-full">
+          <label>Foto del producto</label>
+          <div class="img-upload-wrap">
+            <div class="img-preview" id="imgPreview" onclick="document.getElementById('imgFileInput').click()">
+              <span class="placeholder" id="imgPlaceholderIcon">&#x1F4F7;</span>
+              <span class="ph-text" id="imgPlaceholderText">Hacer clic para subir imagen</span>
+            </div>
+            <button class="img-clear" id="imgClearBtn" onclick="clearImage(event)" title="Quitar imagen">&#x2715;</button>
+          </div>
+          <input type="file" id="imgFileInput" class="img-file-input" accept="image/*" onchange="handleImageUpload(event)">
+        </div>
+        <div class="field form-full"><label>Nombre</label><input type="text" id="fName" placeholder="Ej: Proteina Hoch"></div>
+        <div class="field"><label>Marca</label><input type="text" id="fBrand" placeholder="Star Nutrition"></div>
+        <div class="field"><label>Precio ($)</label><input type="number" id="fPrice" placeholder="25000"></div>
+        <div class="field"><label>Categoria</label>
+          <select id="fCat">
+            <option value="proteinas">Proteinas</option>
+            <option value="creatinas">Creatina</option>
+            <option value="preentreno">Pre-workout</option>
+            <option value="vitaminas">Vitaminas</option>
+            <option value="quemadores">Quemadores</option>
+            <option value="recuperacion">Recuperacion</option>
+            <option value="volumen">Volumen</option>
+            <option value="accesorios">Accesorios</option>
+          </select>
+        </div>
+        <div class="field"><label>Emoji (si no hay foto)</label><input type="text" id="fEmoji" placeholder="&#x1F95B;" maxlength="4"></div>
+        <div class="field form-full"><label>Descripcion corta</label><input type="text" id="fShort" placeholder="Whey de alta calidad"></div>
+        <div class="field form-full"><label>Descripcion completa</label><textarea id="fDesc" placeholder="Descripcion detallada..."></textarea></div>
+        <div class="field form-full"><label>Sabores (separados por coma)</label><input type="text" id="fFlavors" placeholder="Chocolate, Vainilla, Frutilla"></div>
+        <div class="field form-full"><label>Info nutricional (Nombre:Valor, separados por coma)</label><input type="text" id="fNutri" placeholder="Proteinas:25g, Calorias:125kcal, Porciones:30"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="cancelForm()">Cancelar</button>
+        <button class="btn-save" onclick="saveProduct()">Guardar producto</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModalDirect()">&#x2715;</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+var ADM_PASS = "Wing14";
+var isAdmin = false;
+var showEye = false;
+var currentImageData = null; // base64 of current image being edited
+
+var CAT = {proteinas:"Proteinas",creatinas:"Creatina",preentreno:"Pre-workout",vitaminas:"Vitaminas",quemadores:"Quemadores",recuperacion:"Recuperacion",volumen:"Volumen",accesorios:"Accesorios"};
+
+var productos = [
+  {id:1,name:"Proteina Hoch",brand:"Hoch",price:45800,emoji:"&#x1F95B;",img:null,shortdesc:"Whey de alta calidad - 25g proteina",flavors:["Chocolate","Vainilla","Frutilla","Dulce de leche"],nutrition:[["Proteinas","25g"],["Carbohidratos","3g"],["Grasas","1.5g"],["Calorias","125kcal"],["Porciones","30"]],desc:"Ideal para recuperacion muscular post-entreno y aumento de masa magra.",cat:"proteinas"},
+  {id:2,name:"Multivitaminico Star",brand:"Star Nutrition",price:21000,emoji:"&#x1F48A;",img:null,shortdesc:"Vitaminas y minerales esenciales",flavors:[],nutrition:[["Vitamina C","1000mg"],["Vitamina D","1000UI"],["Zinc","10mg"],["Hierro","18mg"]],desc:"Cubre los requerimientos diarios de micronutrientes para rendimiento optimo.",cat:"vitaminas"},
+  {id:3,name:"Proteina Nucleo",brand:"Nucleo",price:32100,emoji:"&#x1F95B;",img:null,shortdesc:"Whey con excelente perfil aminoacidico",flavors:["Chocolate","Vainilla","Cookies"],nutrition:[["Proteinas","24g"],["Carbohidratos","4g"],["Grasas","2g"],["Calorias","130kcal"],["Porciones","28"]],desc:"Alta biodisponibilidad. Ideal para sintesis muscular y recuperacion.",cat:"proteinas"},
+  {id:4,name:"Pre-Entreno V8",brand:"Star Nutrition",price:30300,emoji:"&#x26A1;",img:null,shortdesc:"Energia foco y bomba muscular",flavors:["Sandia","Limon","Tropical","Frutos rojos"],nutrition:[["Cafeina","200mg"],["Beta-Alanina","3.2g"],["Creatina","2g"],["Citrulina","4g"]],desc:"Formula de alto rendimiento para entrenamientos intensos.",cat:"preentreno"},
+  {id:5,name:"Creatina Star",brand:"Star Nutrition",price:23600,emoji:"&#x1F4AA;",img:null,shortdesc:"Creatina monohidrato pura - 60 porciones",flavors:["Sin sabor","Limon"],nutrition:[["Creatina monohidrato","5g"],["Porciones","60"]],desc:"Aumenta fuerza, potencia y recuperacion. La mas estudiada del mercado.",cat:"creatinas"},
+  {id:6,name:"Thermogenix",brand:"Star Nutrition",price:26700,emoji:"&#x1F525;",img:null,shortdesc:"Quemador para perdida de grasa",flavors:["Tropical","Limon"],nutrition:[["Cafeina","200mg"],["L-Carnitina","500mg"],["Te verde","300mg"]],desc:"Acelera el metabolismo y potencia la oxidacion de grasas.",cat:"quemadores"},
+  {id:7,name:"Proteina Star",brand:"Star Nutrition",price:45990,emoji:"&#x1F95B;",img:null,shortdesc:"Whey concentrada con excelente sabor",flavors:["Chocolate","Vainilla","Frutilla","Banana"],nutrition:[["Proteinas","24g"],["Carbohidratos","5g"],["Grasas","2g"],["Calorias","135kcal"],["Porciones","30"]],desc:"Proteina de alta calidad. Ideal para ganancia muscular y recuperacion.",cat:"proteinas"},
+  {id:8,name:"Creatina Hoch",brand:"Hoch",price:27500,emoji:"&#x1F4AA;",img:null,shortdesc:"Creatina micronizada de maxima pureza",flavors:["Sin sabor"],nutrition:[["Creatina micronizada","5g"],["Porciones","60"]],desc:"Micronizada para mayor absorcion. Aumenta rendimiento en alta intensidad.",cat:"creatinas"},
+  {id:9,name:"Pre-Entreno V8",brand:"Nucleo",price:28300,emoji:"&#x26A1;",img:null,shortdesc:"Energia y bomba muscular Nucleo",flavors:["Sandia","Mango","Tropical"],nutrition:[["Cafeina","180mg"],["Beta-Alanina","3g"],["Citrulina","4g"]],desc:"Pre-entreno completo para maximo rendimiento y concentracion.",cat:"preentreno"},
+  {id:10,name:"Creatina Nucleo Fit",brand:"Nucleo",price:20500,emoji:"&#x1F4AA;",img:null,shortdesc:"Creatina practica para el dia a dia",flavors:["Sin sabor","Limon"],nutrition:[["Creatina","3g"],["Porciones","40"]],desc:"Opcion accesible y efectiva para mejorar fuerza y resistencia muscular.",cat:"creatinas"},
+  {id:11,name:"Colageno Star",brand:"Star Nutrition",price:20900,emoji:"&#x2728;",img:null,shortdesc:"Colageno hidrolizado - articulaciones y piel",flavors:["Naranja","Frutos rojos","Sin sabor"],nutrition:[["Colageno hidrolizado","10g"],["Vitamina C","60mg"],["Porciones","30"]],desc:"Refuerza tejidos conectivos y mejora la salud de la piel.",cat:"recuperacion"},
+  {id:12,name:"Ganador de Peso",brand:"Star Nutrition",price:28100,emoji:"&#x2696;",img:null,shortdesc:"Hipercalorico para ganar masa y peso",flavors:["Chocolate","Vainilla","Frutilla"],nutrition:[["Proteinas","30g"],["Carbohidratos","55g"],["Grasas","3g"],["Calorias","370kcal"],["Porciones","15"]],desc:"Ideal para personas con dificultad para subir de peso.",cat:"volumen"},
+  {id:13,name:"Shaker Everlast",brand:"Everlast",price:12900,emoji:"&#x1F964;",img:null,shortdesc:"700ml - compartimiento - libre de BPA",flavors:[],nutrition:[["Capacidad","700ml"],["Material","Libre de BPA"],["Compartimiento","Incluye"]],desc:"Shaker resistente con compartimiento para guardar suplementos.",cat:"accesorios"},
+  {id:14,name:"Colageno Nucleo Fit",brand:"Nucleo",price:22650,emoji:"&#x2728;",img:null,shortdesc:"Colageno para articulaciones y piel",flavors:["Naranja","Limon","Sin sabor"],nutrition:[["Colageno","10g"],["Vitamina C","50mg"],["Porciones","30"]],desc:"Formula para recuperacion articular y cuidado de piel.",cat:"recuperacion"},
+  {id:15,name:"Citrato Magnesio Caps",brand:"Star Nutrition",price:17250,emoji:"&#x1F50B;",img:null,shortdesc:"Magnesio en capsulas - 60 porciones",flavors:[],nutrition:[["Magnesio","300mg"],["Porciones","60"]],desc:"Mejora calidad del sueno, reduce calambres y apoya la funcion muscular.",cat:"recuperacion"},
+  {id:16,name:"Citrato Magnesio Polvo",brand:"Star Nutrition",price:26990,emoji:"&#x1F50B;",img:null,shortdesc:"Magnesio en polvo de alta absorcion",flavors:["Sin sabor","Limon"],nutrition:[["Magnesio","350mg"],["Porciones","30"]],desc:"Maxima absorcion. Ideal para recuperacion nocturna.",cat:"recuperacion"},
+  {id:17,name:"Omega 3",brand:"Star Nutrition",price:28900,emoji:"&#x1F41F;",img:null,shortdesc:"EPA + DHA - corazon y cerebro",flavors:[],nutrition:[["EPA","360mg"],["DHA","240mg"],["Porciones","60"]],desc:"Reduce inflamacion, mejora salud cardiovascular y funcion cognitiva.",cat:"recuperacion"},
+];
+
+var catActiva='todos', currentView='list', editingId=null, nextId=18;
+
+// ── IMAGE HANDLING ──
+function handleImageUpload(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    currentImageData = ev.target.result;
+    showImagePreview(currentImageData);
+  };
+  reader.readAsDataURL(file);
+}
+
+function showImagePreview(src) {
+  var preview = document.getElementById('imgPreview');
+  preview.innerHTML = '<img src="' + src + '" alt="preview">';
+  document.getElementById('imgClearBtn').classList.add('show');
+}
+
+function clearImage(e) {
+  e.stopPropagation();
+  currentImageData = null;
+  document.getElementById('imgFileInput').value = '';
+  document.getElementById('imgPreview').innerHTML =
+    '<span class="placeholder" id="imgPlaceholderIcon">&#x1F4F7;</span>' +
+    '<span class="ph-text" id="imgPlaceholderText">Hacer clic para subir imagen</span>';
+  document.getElementById('imgClearBtn').classList.remove('show');
+}
+
+function thumbHTML(p, size) {
+  // size: 'sm' = 48px list, 'md' = 38px admin, 'lg' = full modal
+  if (p.img) {
+    return '<img src="' + p.img + '" alt="' + p.name + '" style="width:100%;height:100%;object-fit:cover;">';
+  }
+  return '<span style="font-size:' + (size==='lg'?'72px':size==='sm'?'22px':'18px') + '">' + p.emoji + '</span>';
+}
+
+// ── AUTH ──
+function handleLock() {
+  if (isAdmin) { logout(); } else { openLogin(); }
+}
+function openLogin() {
+  document.getElementById('pwInput').value = '';
+  document.getElementById('loginErr').textContent = '';
+  document.getElementById('pwInput').classList.remove('err');
+  document.getElementById('loginOverlay').classList.add('open');
+  setTimeout(function(){ document.getElementById('pwInput').focus(); }, 100);
+}
+function tryLogin() {
+  if (document.getElementById('pwInput').value === ADM_PASS) {
+    isAdmin = true;
+    document.getElementById('loginOverlay').classList.remove('open');
+    document.getElementById('tabAdm').style.display = 'block';
+    document.getElementById('lockBtn').innerHTML = '&#x1F513;';
+    document.getElementById('lockBtn').title = 'Cerrar sesion';
+    showToast('Bienvenido, Leo!');
+  } else {
+    document.getElementById('loginErr').textContent = 'Contrasena incorrecta';
+    document.getElementById('pwInput').classList.add('err');
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+function logout() {
+  isAdmin = false;
+  document.getElementById('tabAdm').style.display = 'none';
+  document.getElementById('lockBtn').innerHTML = '&#x1F512;';
+  document.getElementById('lockBtn').title = 'Acceso admin';
+  showPage('catalogo');
+  showToast('Sesion cerrada');
+}
+function toggleEye() {
+  showEye = !showEye;
+  document.getElementById('pwInput').type = showEye ? 'text' : 'password';
+}
+document.addEventListener('keydown', function(e){
+  if (e.key==='Escape') {
+    document.getElementById('loginOverlay').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+  }
+});
+document.getElementById('loginOverlay').addEventListener('click', function(e){
+  if (e.target===this) this.classList.remove('open');
+});
+
+// ── PAGES ──
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(function(x){ x.classList.remove('active'); });
+  document.getElementById('page-'+p).classList.add('active');
+  document.getElementById('tabCat').classList.toggle('active', p==='catalogo');
+  document.getElementById('tabAdm').classList.toggle('active', p==='admin');
+  if (p==='admin') renderAdmin();
+}
+
+// ── CATALOG ──
+function fmt(n){ return '$' + Number(n).toLocaleString('es-AR'); }
+
+function buildFilters() {
+  var cats = ['todos'].concat(Object.keys(CAT));
+  document.getElementById('catFilters').innerHTML = cats.map(function(c){
+    return '<button class="chip'+(c==='todos'?' active':'')+'" data-cat="'+c+'" onclick="filterCat(\''+c+'\')">'+( c==='todos'?'Todos':CAT[c])+'</button>';
+  }).join('');
+}
+function filterCat(c) {
+  catActiva=c;
+  document.querySelectorAll('#catFilters .chip').forEach(function(x){ x.classList.toggle('active', x.dataset.cat===c); });
+  renderCatalog();
+}
+function setView(v) {
+  currentView=v;
+  document.getElementById('vList').classList.toggle('active', v==='list');
+  document.getElementById('vGrid').classList.toggle('active', v==='grid');
+  renderCatalog();
+}
+function getFiltered() {
+  var q=(document.getElementById('catSearch')?document.getElementById('catSearch').value:'').toLowerCase();
+  return productos.filter(function(p){
+    return (catActiva==='todos'||p.cat===catActiva)&&(!q||p.name.toLowerCase().includes(q)||p.brand.toLowerCase().includes(q)||p.desc.toLowerCase().includes(q));
+  });
+}
+function renderCatalog() {
+  var list=getFiltered();
+  document.getElementById('catCount').textContent=list.length+' producto'+(list.length!==1?'s':'');
+  var c=document.getElementById('catContainer');
+  if (!list.length) { c.innerHTML='<div class="empty"><span>&#x1F50D;</span>Sin resultados</div>'; return; }
+  if (currentView==='grid') {
+    c.innerHTML='<div class="grid-view">'+list.map(function(p){
+      var imgContent = p.img
+        ? '<img src="'+p.img+'" alt="'+p.name+'" style="width:100%;height:100%;object-fit:cover;">'
+        : '<span style="font-size:52px">'+p.emoji+'</span>';
+      return '<div class="g-card" onclick="openModal('+p.id+')">'+
+        '<div class="g-img">'+imgContent+'</div>'+
+        '<div class="g-body">'+
+        '<div class="g-cat">'+( CAT[p.cat]||p.cat)+'</div>'+
+        '<div class="g-name">'+p.name+'</div>'+
+        '<div class="g-brand">'+p.brand+'</div>'+
+        '<div class="g-desc">'+p.shortdesc+'</div>'+
+        '<div class="g-price">'+fmt(p.price)+'</div>'+
+        '</div></div>';
+    }).join('')+'</div>';
+  } else {
+    c.innerHTML='<div class="list-view">'+list.map(function(p){
+      var thumbInner = p.img
+        ? '<img src="'+p.img+'" alt="'+p.name+'" style="width:100%;height:100%;object-fit:cover;">'
+        : '<span style="font-size:22px">'+p.emoji+'</span>';
+      return '<div class="list-row">'+
+        '<div class="l-thumb">'+thumbInner+'</div>'+
+        '<div><div class="l-name">'+p.name+'</div><div class="l-brand">'+p.brand+'</div></div>'+
+        '<div class="l-desc">'+p.shortdesc+'</div>'+
+        '<div><span class="badge b-'+p.cat+'">'+(CAT[p.cat]||p.cat)+'</span></div>'+
+        '<div class="l-price">'+fmt(p.price)+'</div>'+
+        '<div><button class="btn-det" onclick="openModal('+p.id+')">Ver detalle &#x2192;</button></div>'+
+        '</div>';
+    }).join('')+'</div>';
+  }
+}
+
+// ── MODAL ──
+function openModal(id) {
+  var p=productos.find(function(x){ return x.id===id; });
+  if (!p) return;
+  var imgSection = p.img
+    ? '<div class="m-img"><img src="'+p.img+'" alt="'+p.name+'"></div>'
+    : '<div class="m-img"><span style="font-size:72px">'+p.emoji+'</span></div>';
+  var fl = p.flavors.length
+    ? '<div class="sec-lbl" style="margin-top:1rem">Sabores</div><div class="flavor-wrap">'+p.flavors.map(function(f){ return '<span class="fpill">'+f+'</span>'; }).join('')+'</div>'
+    : '';
+  document.getElementById('modalContent').innerHTML =
+    imgSection +
+    '<div class="m-body">'+
+    '<div class="m-header"><div><div class="m-name">'+p.name+'</div><div class="m-sub">'+p.brand+' &middot; <span class="badge b-'+p.cat+'">'+(CAT[p.cat]||p.cat)+'</span></div></div>'+
+    '<div class="m-price">'+fmt(p.price)+'</div></div>'+
+    '<div class="m-desc">'+p.desc+'</div>'+
+    '<div class="sec-lbl">Informacion nutricional</div>'+
+    '<div class="n-grid">'+p.nutrition.map(function(n){ return '<div class="n-cell"><div class="n-val">'+n[1]+'</div><div class="n-lbl">'+n[0]+'</div></div>'; }).join('')+'</div>'+
+    fl+'</div>';
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal(e) { if (e.target===document.getElementById('overlay')) closeModalDirect(); }
+function closeModalDirect() { document.getElementById('overlay').classList.remove('open'); }
+
+// ── ADMIN ──
+function renderAdmin() {
+  var l=document.getElementById('admList');
+  if (!productos.length) { l.innerHTML='<div class="empty"><span>&#x1F4E6;</span>Sin productos</div>'; return; }
+  l.innerHTML=productos.map(function(p){
+    var thumbInner = p.img
+      ? '<img src="'+p.img+'" alt="'+p.name+'" style="width:100%;height:100%;object-fit:cover;">'
+      : '<span style="font-size:18px">'+p.emoji+'</span>';
+    return '<div class="adm-row">'+
+      '<div class="adm-thumb">'+thumbInner+'</div>'+
+      '<div><div class="adm-name">'+p.name+'</div><div class="adm-brand-sm">'+p.brand+'</div></div>'+
+      '<div><span class="badge b-'+p.cat+'">'+(CAT[p.cat]||p.cat)+'</span></div>'+
+      '<div class="adm-price-sm">'+fmt(p.price)+'</div>'+
+      '<div class="adm-actions">'+
+      '<button class="btn-edit" onclick="editProduct('+p.id+')" title="Editar">&#x270F;&#xFE0F;</button>'+
+      '<button class="btn-del" onclick="deleteProduct('+p.id+')" title="Eliminar">&#x1F5D1;</button>'+
+      '</div></div>';
+  }).join('');
+}
+
+function newProduct() {
+  editingId=null;
+  document.getElementById('formMode').textContent='Nuevo';
+  clearForm();
+  document.getElementById('formCard').style.display='block';
+  document.getElementById('formCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function editProduct(id) {
+  var p=productos.find(function(x){ return x.id===id; });
+  if (!p) return;
+  editingId=id;
+  document.getElementById('formMode').textContent='Editar';
+  document.getElementById('fName').value=p.name;
+  document.getElementById('fBrand').value=p.brand;
+  document.getElementById('fPrice').value=p.price;
+  document.getElementById('fCat').value=p.cat;
+  document.getElementById('fEmoji').value=p.emoji;
+  document.getElementById('fShort').value=p.shortdesc;
+  document.getElementById('fDesc').value=p.desc;
+  document.getElementById('fFlavors').value=p.flavors.join(', ');
+  document.getElementById('fNutri').value=p.nutrition.map(function(n){ return n[0]+':'+n[1]; }).join(', ');
+  // load image
+  if (p.img) {
+    currentImageData = p.img;
+    showImagePreview(p.img);
+  } else {
+    currentImageData = null;
+    clearImage({stopPropagation:function(){}});
+  }
+  document.getElementById('formCard').style.display='block';
+  document.getElementById('formCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function saveProduct() {
+  var name=document.getElementById('fName').value.trim();
+  var brand=document.getElementById('fBrand').value.trim();
+  var price=parseInt(document.getElementById('fPrice').value)||0;
+  var cat=document.getElementById('fCat').value;
+  var emoji=document.getElementById('fEmoji').value.trim()||'&#x1F4E6;';
+  var shortdesc=document.getElementById('fShort').value.trim();
+  var desc=document.getElementById('fDesc').value.trim();
+  var flavors=(document.getElementById('fFlavors').value||'').split(',').map(function(x){ return x.trim(); }).filter(Boolean);
+  var nutrition=(document.getElementById('fNutri').value||'').split(',').map(function(x){ var pts=x.split(':'); return [pts[0].trim(), pts.slice(1).join(':').trim()]; }).filter(function(x){ return x[0]&&x[1]; });
+  if (!name||!brand||!price) { showToast('Completa nombre, marca y precio','err'); return; }
+  if (editingId) {
+    var i=productos.findIndex(function(x){ return x.id===editingId; });
+    if (i>-1) productos[i]=Object.assign({},productos[i],{name:name,brand:brand,price:price,cat:cat,emoji:emoji,shortdesc:shortdesc,desc:desc,flavors:flavors,nutrition:nutrition,img:currentImageData});
+    showToast('Producto actualizado');
+  } else {
+    productos.push({id:nextId++,name:name,brand:brand,price:price,cat:cat,emoji:emoji,img:currentImageData,shortdesc:shortdesc,desc:desc,flavors:flavors,nutrition:nutrition});
+    showToast('Producto agregado');
+  }
+  cancelForm(); renderAdmin();
+}
+function deleteProduct(id) {
+  if (!confirm('Eliminar este producto?')) return;
+  productos=productos.filter(function(x){ return x.id!==id; });
+  if (editingId===id) cancelForm();
+  renderAdmin(); showToast('Producto eliminado');
+}
+function cancelForm() {
+  editingId=null; clearForm();
+  document.getElementById('formCard').style.display='none';
+}
+function clearForm() {
+  ['fName','fBrand','fPrice','fEmoji','fShort','fDesc','fFlavors','fNutri'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('fCat').value='proteinas';
+  currentImageData=null;
+  document.getElementById('imgFileInput').value='';
+  document.getElementById('imgPreview').innerHTML=
+    '<span class="placeholder">&#x1F4F7;</span>'+
+    '<span class="ph-text">Hacer clic para subir imagen</span>';
+  document.getElementById('imgClearBtn').classList.remove('show');
+}
+function showToast(msg,type) {
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast'+(type==='err'?' err':'');
+  setTimeout(function(){ t.classList.add('show'); },10);
+  setTimeout(function(){ t.classList.remove('show'); },2800);
+}
+
+buildFilters(); renderCatalog();
+</script>
+</body>
+</html>
